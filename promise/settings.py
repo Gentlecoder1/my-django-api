@@ -24,11 +24,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-lji%1%pr39n7_5d^1^s(75o+=+bl6kc%+u&y_5lkjmiaup8c_='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = []
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://login-auth-api-kfr9.onrender.com',
+]
 
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+# Production configuration
+if not DEBUG:
+    ALLOWED_HOSTS += [
+        '.onrender.com',
+        'your-app-name.onrender.com',
+        'www.yourdomain.com',  # If using custom domain
+    ]
+    
+    # Optional: Allow any hosts when health checking
+    if 'RENDER' in os.environ:
+        ALLOWED_HOSTS.append(os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''))
 # Application definition
 
 INSTALLED_APPS = [
