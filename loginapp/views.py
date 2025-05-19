@@ -3,7 +3,6 @@ from django.http import JsonResponse
 from rest_framework.views import APIView  
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth.models import User, auth
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 
@@ -29,10 +28,18 @@ class LoginView(APIView):
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
         password = request.data.get('password')
+        print(f"Login attempt: username={username}, password={password}")
         user = authenticate(request, username=username, password=password)
-        if user is not None:
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({"message": "Login successful", "token": token.key}, status=200)
-        else:
-            return Response({"error": "Invalid credentials"}, status=400)
+        print(f"Authenticate returned: {user}, type: {type(user)}")
+        try:
+            if user is not None:
+                token, created = Token.objects.get_or_create(user=user)
+                print(f"Token: {token.key}, Created: {created}")
+                return Response({"message": "Login successful", "token": token.key}, status=200)
+            else:
+                print("Invalid credentials")
+                return Response({"error": "Invalid credentials"}, status=400)
+        except Exception as e:
+            print(f"Exception during token creation: {e}")
+            return Response({"error": str(e)}, status=500)
 
